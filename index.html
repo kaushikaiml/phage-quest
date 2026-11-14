@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Phage Quest: The Lambda Switch</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--ink:#2B3A4C;--mut:#6B7C90;--line:#E1E9F2;--pu:#6B54C9;--puL:#EFE9FF;--co:#FF8F85;--coD:#C4453B;--mi:#5CC6A0;--miD:#2A8A68;--go:#F4C467;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Nunito",system-ui,sans-serif;line-height:1.45;overflow-x:hidden;
+ background:radial-gradient(circle at 8% 0,#E6DEFF 0,transparent 40%),radial-gradient(circle at 100% 20%,#D5F3E8 0,transparent 38%),linear-gradient(#F6F9FE,#F1F8F6) fixed}
+body.pad main{padding-bottom:230px}
+.bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.bg i{position:absolute;bottom:-90px;border-radius:50%;opacity:.5;animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-115vh) rotate(90deg)}}
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:14px 16px 32px}
+.hud{display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:900;font-size:1.35rem;background:linear-gradient(90deg,#6B54C9,#2FAE88);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats{display:flex;gap:10px;align-items:center;font-weight:800}
+#hearts{color:#F0647A;letter-spacing:1px}
+#streak{color:#E39A1F}
+#mute{border:0;background:var(--puL);border-radius:50%;width:36px;height:36px;font-size:1rem;cursor:pointer}
+.prog{height:12px;border-radius:6px;background:var(--line);margin:12px 0 6px;overflow:hidden}
+.prog b{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#8E78EE,#5CC6A0);transition:width .5s}
+.lvl{font-weight:800;color:var(--mut);font-size:.9rem;margin-bottom:10px}
+.card{background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border:1.5px solid #fff;border-radius:24px;padding:16px;box-shadow:0 10px 30px rgba(90,100,160,.14)}
+#art svg{display:block;width:100%;max-height:230px;margin-bottom:6px}
+h2{font-size:1.2rem;font-weight:800;margin:4px 0 10px}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--line);border-bottom-width:5px;border-radius:14px;padding:12px 14px;margin:8px 0;cursor:pointer;transition:transform .08s,background .2s}
+.opt:active{transform:translateY(2px)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--pu);outline-offset:2px}
+.opt.ok{border-color:#4CC38A;background:#E5F8EE}
+.opt.bad{border-color:var(--co);background:#FFECE9;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.item{font-weight:800;font-size:1.1rem;text-align:center;padding:22px 14px;border-radius:18px;background:linear-gradient(135deg,#F3EEFF,#E8F8F1);border:2px dashed #C9BDF5;margin:6px 0 10px}
+.item.ok{border-color:#4CC38A}.item.bad{border-color:var(--co);animation:shake .35s}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bin{text-align:center;margin:0}
+.bin.a{background:#FFE3E0;border-color:#FF8F85}.bin.b{background:#DDF5EB;border-color:#5CC6A0}
+.cnt{text-align:center;color:var(--mut);font-weight:700;margin:8px 0 0}
+.pl{margin:0 0 8px;padding:0;list-style:none;counter-reset:s}
+.pl li{counter-increment:s;background:#E5F8EE;border:2px solid #4CC38A;border-radius:12px;padding:8px 12px;margin:6px 0;font-weight:700;animation:pop .3s}
+.pl li:before{content:counter(s);display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#4CC38A;color:#fff;margin-right:8px;font-size:.85rem}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.en{display:flex;gap:6px;justify-content:center;align-items:center;font-weight:700;color:var(--mut);margin:4px 0 8px}
+.en i{width:16px;height:16px;border-radius:50%}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.btn{font:inherit;font-weight:900;border:0;border-bottom:5px solid rgba(0,0,0,.18);border-radius:14px;min-height:50px;padding:10px 12px;cursor:pointer;color:#fff;background:var(--pu)}
+.btn:active{transform:translateY(2px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.c{background:var(--co);color:#5A1812}.btn.m{background:var(--mi);color:#0E3D2D}.btn.g{background:var(--go);color:#4D3A0C}
+.btn.w{width:100%}
+#lean{text-align:center;font-weight:800;min-height:1.4em}
+#tip{text-align:center;color:var(--mut);font-size:.9rem;margin:6px 0 0;min-height:1.3em}
+#beam{transform-origin:150px 104px;transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.hl{filter:drop-shadow(0 0 7px #F4C467);animation:glow 1s ease-in-out infinite alternate}
+@keyframes glow{to{filter:drop-shadow(0 0 14px #F59E0B)}}
+.fb{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .35s;box-shadow:0 -8px 30px rgba(0,0,0,.12)}
+.fb.show{transform:none}.fb.ok{background:#DDF6E8}.fb.bad{background:#FFE5E1}
+.fb div{max-width:488px;margin:0 auto}
+.fb h3{margin:0 0 2px;font-size:1.2rem}.fb.ok h3{color:#1E7A52}.fb.bad h3{color:var(--coD)}
+.fb p{margin:0 0 10px}
+.fb.ok .btn{background:#2FAE6E}.fb.bad .btn{background:#E5594B}
+.ov{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(80,90,140,.35);backdrop-filter:blur(5px)}
+.ov.show{display:flex}
+.ov .card{max-width:420px;text-align:center}
+.ov h2{font-size:1.5rem}
+.stars{font-size:2.2rem;color:var(--go);letter-spacing:4px}
+.ov ul{text-align:left;padding-left:20px}
+.sp{position:fixed;left:50%;bottom:34%;width:10px;height:10px;border-radius:50%;z-index:8;pointer-events:none;animation:fly 1.1s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+@media (prefers-reduced-motion:reduce){.bg,.hl,.sp{display:none}#beam{transition:none}}
+</style>
+</head>
+<body>
+<div class="bg" id="bg"></div>
+<main>
+  <header class="hud">
+    <div class="brand">Phage Quest</div>
+    <div class="stats"><span id="hearts"></span><span id="streak"></span><span>⭐ <b id="score">0</b></span><button id="mute" aria-label="Toggle sound">🔊</button></div>
+  </header>
+  <div class="prog"><b id="pb"></b></div>
+  <div class="lvl" id="lvl"></div>
+  <section class="card"><div id="art"></div><h2 id="q"></h2><div id="ans"></div></section>
+</main>
+
+<div class="fb" id="fb"><div><h3 id="fbt"></h3><p id="fbp"></p><button class="btn w" id="fbb">Continue</button></div></div>
+<div class="ov show" id="ov"><div class="card"><h2 id="ot"></h2><div id="ob"></div><button class="btn w" id="obb" style="margin-top:12px"></button></div></div>
+
+<script>
+// ---------- Questions: 3 chapters x 5 questions ----------
+// t: mcq = pick one, sort = sort clues, order = put steps in order, see = tip the Cro/CI see-saw
+const LV = [
+{ n:"Meet the phage", d:"Learn the parts and how lambda infects E. coli", q:[
+ { t:"mcq", hl:"head", q:"What does the head of lambda phage store?", o:["Phage DNA","Bacterial ribosomes","The tail fibers","Cell wall pieces"], a:0, e:"The head (capsid) is a protein shell packed with the phage’s DNA." },
+ { t:"mcq", hl:"fibers", q:"Which part recognizes and sticks to the E. coli surface?", o:["Tail fibers","The head","The DNA","The ribosome"], a:0, e:"Tail fibers bind a receptor on E. coli (the LamB maltose channel) to start infection." },
+ { t:"mcq", hl:"tail", q:"What does the tail do?", o:["Injects DNA into the cell","Makes energy for the phage","Copies the phage DNA","Digests the whole cell"], a:0, e:"The tail works like a syringe, passing DNA through the cell wall into the bacterium." },
+ { t:"order", q:"Put the first steps of infection in order.", s:["Tail fibers attach to the cell","Phage DNA is injected","The DNA bends into a circle","CI and Cro genes switch on"], e:"Attach, inject, circularize using the sticky cos ends, then the CI and Cro genes start the decision." },
+ { t:"mcq", q:"Lambda is called a temperate phage because it can…", o:["Choose between lysis and lysogeny","Only burst cells","Infect human cells","Survive without a host"], a:0, e:"Temperate phages can kill the host (lytic) or hide in it (lysogenic). Virulent phages only kill." }
+]},
+{ n:"Two paths", d:"Compare the lytic and lysogenic cycles", q:[
+ { t:"sort", q:"Sort each clue into the right cycle.", items:[["Cell bursts and releases about 100 phages",0],["DNA joins the host chromosome",1],["Prophage is copied at every cell division",1],["Host cell dies quickly",0],["Integrase is needed",1],["New phage heads and tails are assembled",0]], e:"Lytic means takeover, assembly and burst. Lysogenic means integration (integrase) and copying along with the host." },
+ { t:"mcq", q:"What is a prophage?", o:["Phage DNA integrated in the host chromosome","A free virus outside the cell","The tail of a phage","A dead phage"], a:0, e:"A prophage is lambda DNA quietly inserted in the bacterial chromosome." },
+ { t:"mcq", q:"Which enzyme inserts lambda DNA into the E. coli chromosome?", o:["Integrase","Helicase","Primase","Amylase"], a:0, e:"Integrase cuts and joins DNA at attachment sites, so the phage genome becomes part of the chromosome." },
+ { t:"order", q:"Put the lytic cycle in order.", s:["Phage DNA takes over the cell","Phage genes make new heads and tails","DNA is packed into the new heads","The cell lyses and phages are released"], e:"Takeover, protein production, packaging, then lysis." },
+ { t:"mcq", q:"A bacterium carrying a prophage divides. Who inherits the prophage?", o:["Both daughter cells","Only one daughter cell","Neither cell","Only cells that burst"], a:0, e:"The prophage is copied with the chromosome, so every descendant carries it." }
+]},
+{ n:"The molecular switch", d:"Cro, CI, CII, RecA and the decision", q:[
+ { t:"mcq", q:"Which protein drives the lytic path?", o:["Cro","CI repressor","Integrase","Tail fiber protein"], a:0, e:"Cro turns on the lytic genes and also blocks CI production." },
+ { t:"mcq", q:"Which protein maintains lysogeny and protects the cell from new lambda phages?", o:["CI repressor","Cro","RecA","Integrase"], a:0, e:"CI blocks the lytic genes of the prophage and of any new lambda DNA. This is immunity." },
+ { t:"see", q:"A starving cell is infected by one phage. Tip the switch to the best strategy, then lock in.", start:0, cro:30, ci:30, reca:0, goal:"lyso", e:"A starved cell makes a poor phage factory. CI wins, and the phage waits as a prophage." },
+ { t:"see", q:"UV damaged a lysogen’s DNA and CI is very high. Escape the cell, then lock in.", start:60, cro:10, ci:30, reca:45, goal:"lytic", e:"UV damage activates RecA, which cuts CI. The prophage leaves the chromosome and goes lytic. This is induction." },
+ { t:"mcq", q:"Many phages infect one cell. Which protein rises and favors lysogeny?", o:["CII","RecA","Cro","Tail fiber protein"], a:0, e:"More phages make more CII, which switches on CI production." }
+]}
+];
+
+// ---------- State and helpers ----------
+const $ = id => document.getElementById(id);
+let L = 0, Q = 0, hearts = 3, streak = 0, score = 0, lvlStart = 0, stars = 0, cur, st, mute = false, AC;
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// tiny sound effects
+function beep(f, d, t) {
+  if (mute) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain(), s = AC.currentTime + (t || 0);
+    o.frequency.value = f; g.gain.setValueAtTime(.08, s); g.gain.exponentialRampToValueAtTime(.001, s + d);
+    o.connect(g); g.connect(AC.destination); o.start(s); o.stop(s + d);
+  } catch (e) {}
+}
+function sparks() {
+  const cols = ["#F4C467", "#5CC6A0", "#B7A6F2", "#FF8F85"];
+  for (let i = 0; i < 16; i++) {
+    const d = document.createElement("span"), a = Math.random() * 6.283, r = 80 + Math.random() * 90;
+    d.className = "sp"; d.style.background = cols[i % 4];
+    d.style.setProperty("--dx", Math.cos(a) * r + "px"); d.style.setProperty("--dy", Math.sin(a) * r - 40 + "px");
+    document.body.appendChild(d); setTimeout(() => d.remove(), 1200);
+  }
+}
+// floating bubbles in the background
+for (let i = 0; i < 9; i++) {
+  const b = document.createElement("i"), s = 30 + Math.random() * 70;
+  b.style.cssText = "left:" + Math.random() * 100 + "%;width:" + s + "px;height:" + s + "px;animation-duration:" + (18 + Math.random() * 20) + "s;animation-delay:-" + Math.random() * 20 + "s;background:" + ["#DCD2FF", "#CBEFE0", "#FFD9D4"][i % 3];
+  $("bg").appendChild(b);
+}
+
+// ---------- Diagrams ----------
+function phage(hl) {
+  const h = p => hl === p ? ' class="hl"' : "";
+  const mk = { head: [236, 34, 184, 40], tail: [212, 118, 157, 118], fibers: [238, 166, 190, 183] }[hl];
+  return '<svg viewBox="0 0 300 200" aria-label="Lambda phage diagram"><defs>' +
+    '<linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#DDD3FF"/><stop offset="1" stop-color="#9C86EA"/></linearGradient>' +
+    '<linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9F0E1"/><stop offset="1" stop-color="#7FD3B3"/></linearGradient></defs>' +
+    '<path d="M0 192 Q150 160 300 192 V200 H0Z" fill="url(#g2)" opacity=".8"/>' +
+    '<g' + h("fibers") + '><path d="M150 150 L106 184 M150 150 L128 190 M150 150 L172 190 M150 150 L194 184" stroke="#7A63D6" stroke-width="3.5" stroke-linecap="round" fill="none"/></g>' +
+    '<g' + h("tail") + '><rect x="143" y="86" width="14" height="66" rx="5" fill="#B7A6F2" stroke="#7A63D6" stroke-width="2"/><path d="M143 100h14M143 114h14M143 128h14M143 142h14" stroke="#7A63D6" stroke-width="1.5"/></g>' +
+    '<g' + h("head") + '><polygon points="150,6 186,26 186,66 150,86 114,66 114,26" fill="url(#g1)" stroke="#7A63D6" stroke-width="2.5"/><path d="M130 40q10-13 20 0t20 0M130 58q10-13 20 0t20 0" stroke="#F4C467" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>' +
+    (mk ? '<line x1="' + mk[0] + '" y1="' + mk[1] + '" x2="' + mk[2] + '" y2="' + mk[3] + '" stroke="#6B54C9" stroke-width="2" stroke-dasharray="4 3"/><circle cx="' + mk[0] + '" cy="' + mk[1] + '" r="14" fill="#6B54C9"/><text x="' + mk[0] + '" y="' + (mk[1] + 6) + '" text-anchor="middle" font-size="17" font-weight="900" fill="#fff">?</text>' : "") + '</svg>';
+}
+function seesaw() {
+  return '<svg viewBox="0 0 300 140" aria-label="See-saw between Cro and CI"><polygon points="132,130 168,130 150,104" fill="#D7E0EC"/><g id="beam">' +
+    '<rect x="25" y="98" width="250" height="8" rx="4" fill="#C3D0E0"/>' +
+    '<circle cx="48" cy="74" r="25" fill="#FFB8B1" stroke="#FF8F85" stroke-width="2.5"/><text x="48" y="80" text-anchor="middle" font-size="16" font-weight="800" fill="#8A2A22">Cro</text>' +
+    '<circle cx="252" cy="74" r="25" fill="#A8E6CE" stroke="#5CC6A0" stroke-width="2.5"/><text x="252" y="80" text-anchor="middle" font-size="16" font-weight="800" fill="#1C6048">CI</text></g></svg>';
+}
+
+// ---------- Screen ----------
+function hud() {
+  $("hearts").textContent = "♥".repeat(hearts) + "♡".repeat(3 - hearts);
+  $("streak").textContent = streak > 1 ? "🔥" + streak : "";
+  $("score").textContent = score;
+  $("pb").style.width = (Q / 5 * 100) + "%";
+}
+function ov(t, html, btn, fn) {
+  $("ot").textContent = t; $("ob").innerHTML = html; $("obb").textContent = btn;
+  $("obb").onclick = () => { $("ov").classList.remove("show"); fn(); };
+  $("ov").classList.add("show");
+}
+
+function render() {
+  cur = LV[L].q[Q]; st = {};
+  $("lvl").textContent = "Chapter " + (L + 1) + ": " + LV[L].n + " | Question " + (Q + 1) + " of 5";
+  $("art").innerHTML = cur.t === "see" ? seesaw() : cur.hl ? phage(cur.hl) : "";
+  $("q").textContent = cur.q;
+  hud();
+  ({ mcq: buildMcq, sort: buildSort, order: buildOrder, see: buildSee })[cur.t]();
+}
+
+function buildMcq() {
+  const o = shuffle(cur.o.map((x, i) => ({ x, ok: i === cur.a })));
+  $("ans").innerHTML = "";
+  o.forEach(op => {
+    const b = document.createElement("button");
+    b.className = "opt"; b.textContent = op.x;
+    b.onclick = () => {
+      if (st.done) return; st.done = 1;
+      b.classList.add(op.ok ? "ok" : "bad");
+      if (!op.ok) [...$("ans").children].forEach((c, i) => { if (o[i].ok) c.classList.add("ok"); });
+      setTimeout(() => done(op.ok), 450);
+    };
+    $("ans").appendChild(b);
+  });
+}
+
+function buildSort() {
+  st.i = 0; st.miss = 0; st.items = shuffle(cur.items.slice()); showItem();
+}
+function showItem() {
+  const it = st.items[st.i];
+  $("ans").innerHTML = '<div class="item" id="it">' + it[0] + '</div><div class="bins"><button class="opt bin a" data-b="0">Lytic</button><button class="opt bin b" data-b="1">Lysogenic</button></div><p class="cnt">' + (st.i + 1) + ' of ' + st.items.length + '</p>';
+  document.querySelectorAll(".bin").forEach(b => b.onclick = () => {
+    if (st.lock) return; st.lock = 1;
+    const ok = +b.dataset.b === it[1]; if (!ok) st.miss++;
+    $("it").classList.add(ok ? "ok" : "bad"); beep(ok ? 660 : 200, .12);
+    setTimeout(() => { st.lock = 0; st.i++; st.i < st.items.length ? showItem() : done(st.miss === 0); }, 600);
+  });
+}
+
+function buildOrder() {
+  st.p = []; st.miss = 0; st.sh = shuffle(cur.s.map((x, i) => i)); drawOrder();
+}
+function drawOrder() {
+  let h = '<ol class="pl">' + st.p.map(i => '<li>' + cur.s[i] + '</li>').join("") + '</ol>';
+  st.sh.forEach(i => { if (!st.p.includes(i)) h += '<button class="opt" data-i="' + i + '">' + cur.s[i] + '</button>'; });
+  $("ans").innerHTML = h;
+  $("ans").querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    if (i === st.p.length) { st.p.push(i); beep(660, .1); drawOrder(); if (st.p.length === cur.s.length) setTimeout(() => done(st.miss === 0), 500); }
+    else { st.miss++; b.classList.add("bad"); beep(200, .15); setTimeout(() => b.classList.remove("bad"), 400); }
+  });
+}
+
+function buildSee() {
+  st.bal = cur.start; st.en = 3;
+  $("ans").innerHTML = '<div id="lean"></div><div class="en">Energy <span id="dots" style="display:flex;gap:6px"></span></div>' +
+    '<div class="tools"><button class="btn c" id="bCro">Boost Cro</button><button class="btn m" id="bCi">Boost CI</button><button class="btn g" id="bRec">RecA cut</button></div>' +
+    '<button class="btn w" id="lock">Lock in decision</button><p id="tip">Tip the see-saw, then lock in.</p>';
+  $("bCro").onclick = () => tip("cro"); $("bCi").onclick = () => tip("ci"); $("bRec").onclick = () => tip("reca");
+  $("lock").onclick = () => { if (st.done) return; st.done = 1; drawSee(); done((st.bal > 0 ? "lyso" : "lytic") === cur.goal); };
+  drawSee();
+}
+function tip(k) {
+  if (st.done || st.en <= 0) return;
+  if (k === "cro") { st.bal -= cur.cro || 30; $("tip").textContent = (cur.cro || 30) <= 10 ? "CI is strong here, so Cro barely moves it." : "Cro gets a boost."; }
+  if (k === "ci") { st.bal += cur.ci; $("tip").textContent = "CI gets a boost."; }
+  if (k === "reca") { if (!cur.reca) { $("tip").textContent = "RecA only works when the DNA is damaged."; return; } st.bal -= cur.reca; $("tip").textContent = "RecA cuts the CI repressor."; }
+  st.en--; beep(440, .08); drawSee();
+}
+function drawSee() {
+  $("beam").style.transform = "rotate(" + Math.max(-20, Math.min(20, st.bal * .22)) + "deg)";
+  $("lean").textContent = st.bal > 8 ? "CI is ahead" : st.bal < -8 ? "Cro is ahead" : "Perfectly balanced";
+  $("lean").style.color = st.bal > 8 ? "var(--miD)" : st.bal < -8 ? "var(--coD)" : "var(--mut)";
+  $("dots").innerHTML = [0, 1, 2].map(i => '<i style="background:' + (i < st.en ? "var(--go)" : "var(--line)") + '"></i>').join("");
+  ["bCro", "bCi", "bRec"].forEach(id => $(id).disabled = st.done || st.en <= 0);
+  $("lock").disabled = !!st.done;
+}
+
+// ---------- Answer feedback and flow ----------
+function done(ok) {
+  let bonus = Math.min(streak, 5) * 10;
+  if (ok) { score += 100 + bonus; streak++; beep(660, .12); beep(880, .18, .12); sparks(); }
+  else { hearts--; streak = 0; beep(180, .3); }
+  hud();
+  $("fb").className = "fb show " + (ok ? "ok" : "bad");
+  $("fbt").textContent = ok ? ["Correct!", "Nice one!", "You nailed it!"][Math.floor(Math.random() * 3)] + "  +" + (100 + bonus) : "Not quite";
+  $("fbp").textContent = cur.e;
+  document.body.classList.add("pad");
+  $("fbb").onclick = () => {
+    $("fb").className = "fb"; document.body.classList.remove("pad");
+    if (hearts <= 0) fail(); else { Q++; Q === 5 ? chapterDone() : render(); }
+  };
+}
+function intro() {
+  hearts = 3; Q = 0; lvlStart = score;
+  ov("Chapter " + (L + 1) + ": " + LV[L].n, "<p>" + LV[L].d + ".</p><p>Answer 5 questions. You have 3 hearts, and streaks earn bonus points.</p>", "Let’s go", render);
+}
+function fail() {
+  ov("Out of hearts", "<p>Read the explanations carefully and try this chapter again.</p>", "Retry chapter", () => { score = lvlStart; streak = 0; hearts = 3; Q = 0; render(); });
+}
+function chapterDone() {
+  stars += hearts; hud();
+  ov("Chapter complete!", '<div class="stars">' + "★".repeat(hearts) + "☆".repeat(3 - hearts) + '</div><p>Score so far: <b>' + score + '</b></p>', L < 2 ? "Next chapter" : "See my lab report", () => { if (L < 2) { L++; intro(); } else finish(); });
+}
+function finish() {
+  const rank = score >= 1700 ? "Phage Master" : score >= 1200 ? "Lab Star" : "Curious Microbe";
+  ov("Lab report: " + rank, '<div class="stars">' + stars + ' / 9 ★</div><p>Final score: <b>' + score + '</b></p><ul>' +
+    '<li>Phage parts: head stores DNA, tail injects, fibers attach.</li>' +
+    '<li>Lytic = Cro, burst. Lysogenic = CI, integrase, prophage.</li>' +
+    '<li>Healthy cells favor lysis. Starved cells and many phages (CII) favor lysogeny.</li>' +
+    '<li>UV activates RecA, which cuts CI (induction).</li></ul>', "Play again", begin);
+}
+function begin() { L = 0; score = 0; streak = 0; stars = 0; intro(); }
+
+$("mute").onclick = () => { mute = !mute; $("mute").textContent = mute ? "🔇" : "🔊"; };
+ov("Welcome to Phage Quest", "<p>You are a young virologist. Learn how the lambda phage chooses between <b>killing</b> a bacterium and <b>hiding</b> inside it.</p><p>3 chapters, 15 questions, labelled diagrams, puzzles and a live Cro vs CI switch.</p>", "Start", begin);
+hud();
+</script>
+</body>
+</html>
