@@ -117,6 +117,30 @@ h2{font-size:1.2rem;font-weight:800;margin:4px 0 10px}
 .chip{font:inherit;font-weight:800;font-size:.88rem;border:2px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;cursor:pointer;color:var(--ink)}
 .chip.on{border-color:var(--pu);background:var(--puL);color:var(--pu)}
 .info{background:#F7F4FF;border-radius:14px;padding:10px 12px;font-size:.92rem;min-height:3em}
+.fx{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
+.fx div{background:rgba(255,255,255,.22);border-radius:12px;padding:6px 10px;font-size:.78rem}
+.fx b{display:block;font-size:.95rem}
+.nb{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:var(--pu);color:#fff;font-size:.85rem;margin-right:8px}
+.sec.g .nb{background:#2FAE88}.sec.o .nb{background:#E39A1F}.sec.r .nb{background:#E5594B}
+.sub{margin:0 0 6px;color:var(--mut);font-size:.88rem}
+.tb{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px}
+.tb th,.tb td{border:1px solid var(--line);padding:6px;text-align:left}
+.tb th{background:#F3EEFF}.tb td:nth-child(2){background:#FFF3F1}.tb td:nth-child(3){background:#EEF9F4}
+.tb td:first-child{font-weight:800;background:#fff}
+#sl{width:100%;accent-color:var(--pu);margin:6px 0 0}
+.sl2{display:flex;justify-content:space-between;font-weight:800;font-size:.8rem}
+#sw{text-align:center;font-weight:800;color:var(--pu);margin:4px 0}
+.ind #pg{transition:transform .6s;transform:translateY(0)}
+.ind #ci,.ind #uv,.ind #rec{transition:opacity .5s}
+.ind #uv,.ind #rec{opacity:0}
+.ind.s1 #uv,.ind.s2 #uv,.ind.s3 #uv,.ind.s4 #uv{opacity:1}
+.ind.s2 #rec,.ind.s3 #rec,.ind.s4 #rec{opacity:1}
+.ind.s3 #ci,.ind.s4 #ci{opacity:0}
+.ind.s4 #pg{transform:translateY(-46px)}
+.rc{background:linear-gradient(135deg,#FFF6DC,#EAF8F1);border-radius:18px;padding:12px 14px;margin-bottom:12px;font-weight:700}
+.cta{position:sticky;bottom:10px;z-index:3;display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.96);border:1.5px solid #fff;border-radius:18px;padding:10px 12px;box-shadow:0 8px 24px rgba(90,100,160,.25);margin-top:12px}
+.cta span{font-weight:800;color:var(--mut);flex:1;font-size:.9rem}
+.cta .btn{width:auto;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.bg,.hl,.sp{display:none}#beam,#pbeam{transition:none}}
 </style>
 </head>
@@ -397,59 +421,114 @@ function drawSee() {
 }
 
 // ---------- Interactive poster (shown before the game) ----------
+const FACTS = [["Host", "E. coli"], ["Genome", "~48.5 kb dsDNA"], ["Type", "Temperate phage"], ["Discovered", "1950, E. Lederberg"]];
 const PINFO = {
   head: ["Head (capsid)", "A protein shell that packs about 48.5 kb of double-stranded DNA with sticky cos ends."],
   tail: ["Tail", "A flexible tube that channels the DNA into the bacterium during injection."],
   fibers: ["Tail fibers", "Bind the LamB receptor (the maltose channel) on the E. coli outer membrane to start infection."]
 };
+const STEPS = [
+  ["1 Attach", "Tail fibers (tip protein J) bind LamB, the maltose channel on the E. coli outer membrane."],
+  ["2 Inject", "The tail forms a channel and the linear DNA slips into the cell. The empty head stays outside."],
+  ["3 Circularize", "The single-stranded cos ends anneal and host DNA ligase seals the nicks, making a circle."],
+  ["4 Decide", "Early in infection, CI and Cro compete for control. The winner decides lytic or lysogenic."]
+];
 const NINFO = {
   start: "Lambda DNA enters through the tail, and its sticky cos ends join to form a circle.",
   cro: "Cro protein is made. It blocks CI and switches on the lytic genes.",
   build: "The host machinery makes phage heads, tails and many copies of the DNA.",
-  burst: "Lysis: about 100 new phages are released and the host cell dies.",
+  burst: "Lysis: holin and endolysin proteins break the cell open and about 100 new phages are released.",
   ci: "CI repressor is made. It shuts off the lytic genes and blocks Cro.",
   int: "Integrase inserts the phage DNA into the E. coli chromosome. It is now a prophage.",
   copy: "The prophage is copied with the host chromosome at every cell division.",
   uv: "DNA damage activates RecA, which makes CI cut itself. The prophage escapes (induction)."
 };
+const CMP = [["", "Lytic", "Lysogenic"], ["Host cell", "Dies (bursts)", "Survives and divides"], ["Phage DNA", "Free, copied many times", "Integrated as a prophage"], ["Key protein", "Cro", "CI repressor"], ["Key enzyme", "Holin + endolysin", "Integrase"], ["Offspring", "About 100 new phages", "Prophage in every daughter cell"], ["Favored by", "Healthy cell, 1 phage", "Starved cell, many phages"]];
 const PRESETS = [
   ["Healthy cell", -45, "Cro wins, so the phage goes lytic. Good growth conditions favor lysis."],
   ["Starved cell", 45, "CI wins, so the phage goes lysogenic. Poorly growing cells favor waiting as a prophage."],
   ["Many phages", 60, "More phages make more CII protein, which switches on CI. Lysogeny wins."],
   ["UV damage", -50, "In a lysogen, RecA cuts CI. Cro wins and the prophage goes lytic (induction)."]
 ];
+const DEEP = "Genetic detail: CI binds the operators OR1 and OR2. This blocks the PR promoter (which makes Cro) and switches on CI’s own promoter PRM. Cro binds OR3, which blocks PRM (CI).";
+const INDUC = [
+  ["1 UV hits", "UV light damages the bacterial DNA."],
+  ["2 RecA wakes", "The damaged DNA activates the RecA protein."],
+  ["3 CI is cut", "RecA makes the CI repressor cut itself, so the lytic genes switch on."],
+  ["4 Escape", "Integrase and excisionase (Xis) cut the prophage out of the chromosome, and the lytic cycle starts."]
+];
 const TERMS = {
   "Temperate phage": "A phage that can choose between the lytic and lysogenic cycles.",
   "Prophage": "Phage DNA integrated in the host chromosome.",
+  "Lysogen": "A bacterium that carries a prophage.",
   "Integrase": "Enzyme that inserts lambda DNA into the host chromosome.",
   "CI repressor": "Keeps lysogeny on and gives immunity to new lambda phages.",
   "Cro": "Drives the lytic path and blocks CI.",
   "CII": "Made when many phages infect one cell. Switches on CI.",
   "RecA": "Activated by DNA damage. Triggers CI cleavage.",
-  "Induction": "The switch from lysogenic back to lytic after DNA damage."
+  "Induction": "The switch from lysogenic back to lytic after DNA damage.",
+  "Immunity": "A lysogen resists new lambda infection because its CI blocks the incoming DNA.",
+  "Lysis": "Bursting of the host cell by holin and endolysin proteins.",
+  "cos sites": "Sticky ends of lambda DNA that join to form a circle."
 };
+const WHY = [
+  ["Gene regulation", "Lambda is the classic model for how a genetic switch works (Mark Ptashne, A Genetic Switch)."],
+  ["Cloning vectors", "Modified lambda phages are used as vectors to clone and carry DNA fragments."],
+  ["Gene transfer", "Prophages can carry host genes to new cells (specialized transduction)."],
+  ["Toxins", "Some prophages carry toxin genes, for example Shiga toxin genes on lambda-like prophages of E. coli O157:H7."]
+];
 function chip(box, label, fn) {
   const b = document.createElement("button");
   b.className = "chip"; b.textContent = label;
   b.onclick = () => { box.querySelectorAll(".chip").forEach(c => c.classList.remove("on")); b.classList.add("on"); fn(); };
   box.appendChild(b);
 }
+const seen = new Set();
+function mark(k) {
+  seen.add(k);
+  $("xp").textContent = seen.size >= 7 ? "All 7 sections explored ✓" : "Explored " + seen.size + " of 7 sections";
+}
+// induction diagram: chromosome, prophage (gold), CI shield (green), UV rays and RecA
+function ind() {
+  return '<svg class="ind s0" viewBox="0 0 300 150" aria-label="Induction steps"><path d="M10 105 H105 M195 105 H290" stroke="#8DB7DE" stroke-width="8" stroke-linecap="round"/>' +
+    '<g id="pg"><rect x="105" y="100" width="90" height="10" rx="5" fill="#F4C467"/><text x="150" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#6B7C90">Prophage</text></g>' +
+    '<g id="ci"><ellipse cx="150" cy="105" rx="58" ry="19" fill="#A8E6CE" fill-opacity=".8" stroke="#5CC6A0" stroke-width="2"/><text x="150" y="110" text-anchor="middle" font-size="14" font-weight="800" fill="#1C6048">CI</text></g>' +
+    '<g id="uv"><path d="M20 10 L68 88 M50 6 L98 88 M80 4 L128 88" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/></g>' +
+    '<g id="rec"><rect x="205" y="38" width="66" height="26" rx="13" fill="#F4C467"/><text x="238" y="56" text-anchor="middle" font-size="13" font-weight="800" fill="#4D3A0C">RecA</text><path d="M226 64 L192 90" stroke="#F4C467" stroke-width="3" stroke-dasharray="4 3"/></g></svg>';
+}
 function poster() {
+  seen.clear();
   $("gm").classList.add("hide"); $("exit").classList.add("hide"); $("poster").classList.remove("hide");
+  const tb = '<table class="tb">' + CMP.map((r, i) => '<tr>' + r.map(c => i === 0 ? '<th>' + c + '</th>' : '<td>' + c + '</td>').join("") + '</tr>').join("") + '</table>';
   $("poster").innerHTML =
-    '<div class="ban"><h1>Lambda phage: the lytic and lysogenic switch</h1><p>A temperate bacteriophage of E. coli and a classic genetic switch. Tap everything on this poster, then play the game.</p></div>' +
-    '<section class="card sec"><h3>1. Meet the phage</h3><div id="p1">' + phage("", true) + '</div><div class="chips" id="c1"></div><div class="info" id="i1">Tap a part to learn what it does.</div></section>' +
-    '<section class="card sec g"><h3>2. Two ways to live</h3>' + flow(true) + '<div class="info" id="i2">Tap any box in the flow chart.</div></section>' +
-    '<section class="card sec o"><h3>3. The molecular switch</h3><div id="p3">' + seesaw().replace('id="beam"', 'id="pbeam"') + '</div><div class="chips" id="c3"></div><div class="info" id="i3">Pick a situation and watch the see-saw: Cro (lytic) against CI (lysogenic).</div></section>' +
-    '<section class="card sec r"><h3>4. Key terms</h3><div class="chips" id="c4"></div><div class="info" id="i4">Tap a term.</div></section>' +
-    '<p class="cnt">Tip: during the game, tap Exit at any time to see your scorecard.</p><button class="btn w" id="go">Start the game</button>';
-  Object.keys(PINFO).forEach(k => chip($("c1"), PINFO[k][0], () => { $("p1").innerHTML = phage(k, true); $("i1").innerHTML = "<b>" + PINFO[k][0] + ":</b> " + PINFO[k][1]; }));
+    '<div class="ban"><h1>Lambda phage: the lytic and lysogenic switch</h1><p>How one virus decides between killing a bacterium and hiding inside it. Tap every part of this poster, then play the game.</p><div class="fx">' + FACTS.map(f => '<div>' + f[0] + '<b>' + f[1] + '</b></div>').join("") + '</div></div>' +
+    '<section class="card sec"><h3><span class="nb">1</span>Meet the phage</h3><div id="p1">' + phage("", true) + '</div><div class="chips" id="c1"></div><div class="info" id="i1">Tap a part to see what it does.</div></section>' +
+    '<section class="card sec"><h3><span class="nb">2</span>How infection starts</h3><p class="sub">Four steps, in order. Tap each one.</p><div class="chips" id="c2"></div><div class="info" id="i2">Tap a step.</div></section>' +
+    '<section class="card sec g"><h3><span class="nb">3</span>Two ways to live</h3>' + flow(true) + '<div class="info" id="i3">Tap any box in the flow chart.</div>' + tb + '</section>' +
+    '<section class="card sec o"><h3><span class="nb">4</span>The molecular switch</h3><div id="p4">' + seesaw().replace('id="beam"', 'id="pbeam"') + '</div>' +
+    '<div class="sl2"><span style="color:var(--coD)">Cro (lytic)</span><span style="color:var(--miD)">CI (lysogenic)</span></div><input type="range" id="sl" min="-100" max="100" value="0" aria-label="Cro to CI balance"><div id="sw">Balanced: the cell has not decided</div>' +
+    '<div class="chips" id="c4"></div><div class="info" id="i4">Drag the slider or pick a situation.</div></section>' +
+    '<section class="card sec r"><h3><span class="nb">5</span>Induction: the escape</h3><div id="p5">' + ind() + '</div><div class="chips" id="c5"></div><div class="info" id="i5">Tap the steps in order to watch the prophage escape.</div></section>' +
+    '<section class="card sec"><h3><span class="nb">6</span>Key terms</h3><div class="chips" id="c6"></div><div class="info" id="i6">Tap a term.</div></section>' +
+    '<section class="card sec g"><h3><span class="nb">7</span>Why it matters</h3><div class="chips" id="c7"></div><div class="info" id="i7">Tap a topic.</div></section>' +
+    '<div class="rc">Remember it: <span style="color:var(--coD)">Cro = Cell ROasted</span> (lytic). <span style="color:var(--miD)">CI = Calm Inside</span> (lysogenic).</div>' +
+    '<div class="cta"><span id="xp">Explored 0 of 7 sections</span><button class="btn" id="go">Start the game</button></div>';
+  Object.keys(PINFO).forEach(k => chip($("c1"), PINFO[k][0], () => { $("p1").innerHTML = phage(k, true); $("i1").innerHTML = "<b>" + PINFO[k][0] + ":</b> " + PINFO[k][1]; mark("s1"); }));
+  STEPS.forEach(t => chip($("c2"), t[0], () => { $("i2").textContent = t[1]; mark("s2"); }));
   $("poster").querySelectorAll(".nd").forEach(g => g.onclick = () => {
     $("poster").querySelectorAll(".nd").forEach(x => x.classList.remove("ok"));
-    g.classList.add("ok"); $("i2").textContent = NINFO[g.dataset.k]; beep(520, .08);
+    g.classList.add("ok"); $("i3").textContent = NINFO[g.dataset.k]; beep(520, .08); mark("s3");
   });
-  PRESETS.forEach(p => chip($("c3"), p[0], () => { $("pbeam").style.transform = "rotate(" + Math.max(-20, Math.min(20, p[1] * .22)) + "deg)"; $("i3").textContent = p[2]; }));
-  Object.keys(TERMS).forEach(t => chip($("c4"), t, () => { $("i4").innerHTML = "<b>" + t + ":</b> " + TERMS[t]; }));
+  const setSw = v => {
+    $("sl").value = v; $("pbeam").style.transform = "rotate(" + Math.max(-20, Math.min(20, v * .22)) + "deg)";
+    $("sw").textContent = v < -10 ? "Cro leads: lytic path" : v > 10 ? "CI leads: lysogenic path" : "Balanced: the cell has not decided";
+  };
+  $("sl").oninput = () => { setSw(+$("sl").value); mark("s4"); };
+  PRESETS.forEach(pr => chip($("c4"), pr[0], () => { setSw(pr[1]); $("i4").textContent = pr[2]; mark("s4"); }));
+  chip($("c4"), "Go deeper: genes", () => { $("i4").textContent = DEEP; mark("s4"); });
+  INDUC.forEach((t, i) => chip($("c5"), t[0], () => { $("p5").querySelector("svg").setAttribute("class", "ind s" + (i + 1)); $("i5").textContent = t[1]; mark("s5"); }));
+  Object.keys(TERMS).forEach(t => chip($("c6"), t, () => { $("i6").innerHTML = "<b>" + t + ":</b> " + TERMS[t]; mark("s6"); }));
+  WHY.forEach(w => chip($("c7"), w[0], () => { $("i7").textContent = w[1]; mark("s7"); }));
   $("go").onclick = begin;
   window.scrollTo(0, 0);
 }
